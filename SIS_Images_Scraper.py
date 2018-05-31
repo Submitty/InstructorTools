@@ -1,22 +1,25 @@
-import getpass
-import urllib
-import os
+import getpass, urllib, os, re
+from pathlib import Path
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
+from selenium.webdriver.chrome.options import Options
+chrome_options = Options()
+chrome_options.add_argument("--headless")
 from selenium.webdriver.common.keys import Keys
+    
 
 # Login to SIS
 def login(driver):
-    # Get User ID and PIN
-    user_id = getpass.getpass("User ID: ")
+    # Get RIN and PIN
+    rin_id = input("RIN: ")
     pin_id = getpass.getpass("PIN: ")
 
     # Click into login page
     driver.find_element_by_link_text('Login').click()
 
-    # Types in username and pin in login page
-    username = driver.find_element_by_name('sid')
-    username.send_keys(user_id)
+    # Types in RIN and PIN in login page
+    rin = driver.find_element_by_name('sid')
+    rin.send_keys(rin_id)
     pin = driver.find_element_by_name('PIN')
     pin.send_keys(pin_id)
 
@@ -70,9 +73,20 @@ def getSession(driver):
 
 # Saves the images with rcs id as image name to a term/course folder
 def saveImagesToFolder(term, course, class_list):
+    # create shortened name for class folder
+    course_name = re.match(r'([A-Z]{4}) ([0-9]{4}) ([0-9]+)\:',course)
+    if course_name is None:
+        print ("Invalid format for course name")
+        return
+    course_folder_name = "{}-{}-{}".format(*course_name.groups())
+    
+    # make term (month year) into month-year
+    term_elements = term.split()
+    folder_term = term_elements[0]+"-"+term_elements[1]
+    
     # get path and create path if not already existed
-    path = "{}/{}".format(term, course)
-    os.makedirs(path, exist_ok=True)
+    path = Path(folder_term, course_folder_name)
+    path.mkdir(exist_ok=True, parents=True)
 
     # loops through the class list of dictionaries of student info
     for i in range(len(class_list)):
@@ -83,14 +97,16 @@ def saveImagesToFolder(term, course, class_list):
                     name_str = class_list[i].get(k).split()
                     first_name = name_str[0]
                     last_name = name_str[1]
-                    rcs_id = "error_{}_{}".format(first_name, last_name)
+                    rcs_id = "error-{}-{}".format(first_name, last_name)
             # if there is an email address, assign letters before "@rpi.edu" to rcs_id
             if k == "email":
                 rcs_id = class_list[i].get(k)[:-8]
             # regardless if email or not, get image if the current dict key is img url
             if k == "img url":
                 img_url = class_list[i].get(k)
-        urllib.request.urlretrieve(img_url, path+"/"+rcs_id+".png")
+        img_name = rcs_id+".png"
+        filepath = path / img_name
+        urllib.request.urlretrieve(img_url, str(filepath))
 
 
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
@@ -158,9 +174,15 @@ def getInfoFromCourse(driver):
     # click Course Information- Select a CRN
     driver.find_element_by_link_text('Course Information- Select a CRN').click()
 
+    # check if there are any sections assigned for this term
+    if len(driver.find_elements_by_class_name('warningtext')) == 1:
+        print ("Error: No sections assigned for this term!")
+        return
+    
     # iterate and ask if user wants images/names from this course
     select_course = Select(driver.find_element_by_name('crn'))
     options_course = select_course.options
+    
     for index in range(len(options_course)):
         # all dicts put into list for each class section
         class_list = []
@@ -171,14 +193,14 @@ def getInfoFromCourse(driver):
         # gets the images the user wants for the class section by looping until the user enters a valid command
         foundAnswer = False
         while not foundAnswer:
-            # Asks if user wants pictures from current course displayed
+            # asks if user wants pictures from current course displayed
             print("Do you want pictures from {}?".format(course))
-            answer = input("Y/N/Exit\n")
-            if answer == "N":
+            answer = input("Y/N/Exit\n").lower()
+            if answer == "n":
                 break
-            elif answer == "Exit":
+            elif answer == "exit":
                 return
-            elif answer == "Y":
+            elif answer == "y":
                 # get the class list of dictionary of email, name, and image per student
                 class_list = getStudentInfoFromCourse(driver, select_course, index, class_list)
                 if class_list == 0:
@@ -189,16 +211,14 @@ def getInfoFromCourse(driver):
             else:
                 print("Invalid answer! Try again!")
 
-if __name__ == "__main__":
-    # Open SIS
-    driver = webdriver.Chrome()
-    driver.get("https://sis.rpi.edu/")
-
-    # if login is invalid with incorrect User ID or PIN, end the program
-    if not login(driver):
-        driver.close()
-
-    # if login is valid with correct User ID and PIN, continue the program by collecting data
-    else:
-        getInfoFromCourse(driver)
-        driver.close()
+if __name__ == "__main__":      
+    driver = webdriver.Chrome(chrome_options=chrome_options)
+    try:
+        # open SIS
+        driver.get('https://sis.rpi.edu/')
+        # if login is valid with correct User ID or PIN, econtinue the program by collecting data
+        if login(driver):
+            getInfoFromCourse(driver)
+    finally:
+        # ends the program 
+        driver.quit()    
