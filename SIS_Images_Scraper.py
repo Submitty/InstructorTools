@@ -1,4 +1,4 @@
-import getpass, urllib, os, re
+import getpass, requests, os, re
 from pathlib import Path
 from selenium.webdriver.support.ui import Select
 from selenium import webdriver
@@ -104,10 +104,12 @@ def saveImagesToFolder(term, course, class_list):
             # regardless if email or not, get image if the current dict key is img url
             if k == "img url":
                 img_url = class_list[i].get(k)
+        # download and save the image to a specific folder (term/course_section) from the image url
         img_name = rcs_id+".png"
         filepath = path / img_name
-        urllib.request.urlretrieve(img_url, str(filepath))
-
+        r = requests.get(img_url)
+        with open(str(filepath),'wb') as f:
+            f.write(r.content)
 
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
 def getStudentInfoFromCourse(driver, select_course, index, class_list):
