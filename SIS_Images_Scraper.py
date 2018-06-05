@@ -107,6 +107,7 @@ def saveImagesToFolder(term, course, class_list):
         # download and save the image to a specific folder (term/course_section) from the image url
         img_name = rcs_id+".png"
         filepath = path / img_name
+        #TODO: Get SSL cipher setting to work with requests, right now still getting handshake errors
         r = requests.get(img_url)
         with open(str(filepath),'wb') as f:
             f.write(r.content)
@@ -140,9 +141,17 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         img_url = driver.current_url
         driver.get(img_url)
 
-        # image
-        image = driver.find_elements_by_tag_name('img')[6].get_attribute('src')
-        student_record['img url'] = image
+        # image, initalize to empty string
+        student_record['img url'] = ""
+        image_arr = driver.find_elements_by_tag_name('img')
+
+        #do search through all <img> tags for first non-header-layout tag
+        #have to skip 2 more <img> tags because they are transparent images
+        for i in range(len(image_arr)):
+            if image_arr[i].get_attribute('NAME') != "web_tab_corner_right":
+                student_record['img url'] = image_arr[i+2].get_attribute('src')
+                print("found non-match, +2 is " + student_record['img url'])
+                break
 
         # name
         info_name = driver.find_elements_by_class_name('plaintable')[4].find_element_by_tag_name('tbody').find_element_by_tag_name('tr').find_elements_by_tag_name('td')[1].text
@@ -214,11 +223,14 @@ def getInfoFromCourse(driver):
                 print("Invalid answer! Try again!")
 
 if __name__ == "__main__":      
+    #Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
+    #Be careful about navigating to any other sites...
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA'
     driver = webdriver.Chrome(chrome_options=chrome_options)
     try:
         # open SIS
         driver.get('https://sis.rpi.edu/')
-        # if login is valid with correct User ID or PIN, econtinue the program by collecting data
+        # if login is valid with correct User ID or PIN, continue the program by collecting data
         if login(driver):
             getInfoFromCourse(driver)
     finally:
