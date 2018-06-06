@@ -150,7 +150,8 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         for i in range(len(image_arr)):
             if image_arr[i].get_attribute('NAME') != "web_tab_corner_right":
                 student_record['img url'] = image_arr[i+2].get_attribute('src')
-                print("found non-match, +2 is " + student_record['img url'])
+                #Uncomment this line to print the image URLs we are attempting, useful for debugging
+                #print("found non-match, +2 is " + student_record['img url'])
                 break
 
         # name
@@ -225,7 +226,7 @@ def getInfoFromCourse(driver):
 if __name__ == "__main__":      
     #Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     #Be careful about navigating to any other sites...
-    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA'
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA'
     driver = webdriver.Chrome(chrome_options=chrome_options)
     try:
         # open SIS
