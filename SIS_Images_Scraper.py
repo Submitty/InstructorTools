@@ -6,6 +6,13 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 chrome_options.add_argument("--headless")
 from selenium.webdriver.common.keys import Keys
+
+#Workaround for if pyopenssl is installed and we want weak keys
+try:
+    from urllib3.contrib import pyopenssl
+    pyopenssl.extract_from_urllib3()
+except ImportError:
+    pass
     
 
 # Login to SIS
