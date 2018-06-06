@@ -12,8 +12,7 @@ try:
     from urllib3.contrib import pyopenssl
     pyopenssl.extract_from_urllib3()
 except ImportError:
-    pass
-    
+    pass    
 
 # Login to SIS
 def login(driver):
