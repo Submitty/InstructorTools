@@ -113,7 +113,6 @@ def saveImagesToFolder(term, course, class_list):
         # download and save the image to a specific folder (term/course_section) from the image url
         img_name = rcs_id+".png"
         filepath = path / img_name
-        #TODO: Get SSL cipher setting to work with requests, right now still getting handshake errors
         r = requests.get(img_url)
         with open(str(filepath),'wb') as f:
             f.write(r.content)
@@ -137,12 +136,24 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
     # find link for pic
     student_list = driver.find_elements_by_class_name('datadisplaytable')[2].find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
 
+    # find which column is the "Student Name" column, since it isn't always the same column number
+    student_headers = student_list[0].find_elements_by_tag_name('th')
+    stu_col = -1
+    for i in range(len(student_headers)):
+        if student_headers[i].text == "Student Name":
+            stu_col = i
+    if stu_col <0:
+        driver.back()
+        driver.back()
+        print("Error: Could not find a column labeled \"Student Name\"!")
+        return 0
+
     # loop through list of students to get image, name, and email
     # all info collected from for loop (img url, name, email) put into dict
     for s in range(1, len(student_list)):
         student_record = {}
         student = driver.find_elements_by_class_name('datadisplaytable')[2].find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')[s]
-        student.find_elements_by_tag_name('td')[1].find_element_by_class_name('fieldmediumtext').click()
+        student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
 
         img_url = driver.current_url
         driver.get(img_url)
@@ -219,6 +230,7 @@ def getInfoFromCourse(driver):
             elif answer == "exit":
                 return
             elif answer == "y":
+                print ("Getting student pictures...  (this could take a few seconds per student)")
                 # get the class list of dictionary of email, name, and image per student
                 class_list = getStudentInfoFromCourse(driver, select_course, index, class_list)
                 if class_list == 0:
