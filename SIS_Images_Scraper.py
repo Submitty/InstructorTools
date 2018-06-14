@@ -230,6 +230,7 @@ def getInfoFromCourse(driver):
             elif answer == "exit":
                 return
             elif answer == "y":
+                print ("Getting student pictures...  (this could take a few seconds per student)")
                 # get the class list of dictionary of email, name, and image per student
                 class_list = getStudentInfoFromCourse(driver, select_course, index, class_list)
                 if class_list == 0:
