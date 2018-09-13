@@ -113,6 +113,9 @@ def saveImagesToFolder(term, course, class_list):
         # download and save the image to a specific folder (term/course_section) from the image url
         img_name = rcs_id+".png"
         filepath = path / img_name
+        if img_url.split("/")[-1].strip() == "web_transparent.gif":
+            print("Skipping {} because no photo on SIS".format(rcs_id))
+            continue
         r = requests.get(img_url)
         with open(str(filepath),'wb') as f:
             f.write(r.content)
