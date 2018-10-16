@@ -122,12 +122,13 @@ def create_container_objects(testcase, use_router, which_untrusted, output_folde
 def setup_folder_for_user_deployment(container_obj, input_directory, submissions_directory, student_name, active_version):
   #TODO: pre-commands may eventually wipe the following logic out.
   #copy the required files to the test directory
-  copy_contents_into(input_directory,container_obj.mounted_directory)
   student_code_directory = os.path.join(submissions_directory,"submissions",student_name,str(active_version))
   copy_contents_into(student_code_directory, container_obj.mounted_directory)
   student_checkout_directory = os.path.join(submissions_directory,"checkout",student_name,str(active_version))
   if os.path.exists(student_checkout_directory):
       copy_contents_into(student_checkout_directory, container_obj.mounted_directory)
+
+  copy_contents_into(input_directory,container_obj.mounted_directory)
 
 def network_containers(container_info,test_input_folder,which_untrusted, use_router,single_port_per_container):
   if len(container_info) <= 1:
