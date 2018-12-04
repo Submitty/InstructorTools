@@ -8,6 +8,7 @@ import os
 import shutil
 import json
 import argparse
+import getpass
 
 class container_info_object:
   def __init__(self, untrusted_name, container_name, container_image, outgoing_connections, 
@@ -23,7 +24,7 @@ class container_info_object:
     if untrusted_name == None:
       self.untrusted_name = container_name
     else:
-      self.untrusted_name = "{0}_{1}".format(untrusted_name, name)
+      self.untrusted_name = "{0}_{1}".format(untrusted_name, container_name)
       
 
   #Launch a single docker.
@@ -268,6 +269,8 @@ if __name__ == '__main__':
 
   output_path = os.path.join(output_path, student_id)
 
+  username = getpass.getuser()
+
   if not os.path.exists(input_path):
     os.makedirs(input_path)
 
@@ -294,7 +297,7 @@ if __name__ == '__main__':
     print("ERROR: could not access testcase {0} in the testcases array in the configuration file.".format(testcase_num))
 
 
-  network_objects = create_containers(my_testcase, testcase_num, input_path, output_path, which_untrusted=None, submissions_directory=submission_path, student_name=student_id, active_version=active_version)
+  network_objects = create_containers(my_testcase, testcase_num, input_path, output_path, which_untrusted=username, submissions_directory=submission_path, student_name=student_id, active_version=active_version)
 
   if network_objects is None:
     sys.exit(1)
