@@ -23,7 +23,7 @@ class container_info_object:
     if untrusted_name == None:
       self.untrusted_name = container_name
     else:
-      self.untrusted_name = "{0}_{1}".format(untrusted_name, name)
+      self.untrusted_name = "{0}_{1}".format(untrusted_name, container_name)
       
 
   #Launch a single docker.
@@ -294,7 +294,7 @@ if __name__ == '__main__':
     print("ERROR: could not access testcase {0} in the testcases array in the configuration file.".format(testcase_num))
 
 
-  network_objects = create_containers(my_testcase, testcase_num, input_path, output_path, which_untrusted=None, submissions_directory=submission_path, student_name=student_id, active_version=active_version)
+  network_objects = create_containers(my_testcase, testcase_num, input_path, output_path, which_untrusted=student_id, submissions_directory=submission_path, student_name=student_id, active_version=active_version)
 
   if network_objects is None:
     sys.exit(1)
