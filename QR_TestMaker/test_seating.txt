@@ -4,5 +4,5 @@ Miller          Fred            millerf         3       Darrin   239     EXTRA  
 N/A             N/A             N/A             N/A     Darrin   308     RED        2          5          N/A
 Smith           Alex            smitha          8       Sage     3303    BLUE       2          6          6-7:50pm
 N/A             N/A             N/A             N/A     Darrin   308     RED        N/A        16         N/A
-Collins         Bethany         collinsb        1       Darin    308     RED        8          7          6-7:50pm
+Collins         Bethany         collinsb        1       Darrin    308     RED        8          7          6-7:50pm
 
