@@ -2,7 +2,7 @@
 
 \usepackage{pdfpages,fancyvrb,fancyhdr,multirow,comment}
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
 % PAGE DIMENSIONS
 \textwidth  7.5in
 \oddsidemargin -0.5in
@@ -14,6 +14,9 @@
 \input{student_variables.tex}
 
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% blank lines if names are not pre-printed on exams
 \newcommand{\fillinname}
 {
 \begin{minipage}{3.2in}
@@ -26,9 +29,11 @@
 }
 
 
-
 \beginnone
 \else
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% helper function that use the data to print the student name
 \newcommand{\studentname}
 {
 \renewcommand{\arraystretch}{1.5}
@@ -67,9 +72,8 @@ seat:& \studentseat
 }
 
 
-
-
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% helper function that use the data to only print the zone
 
 \newcommand{\zoneonly}
 {
@@ -92,14 +96,13 @@ seat:& \studentseat
 \end{minipage}
 }
 
-
-
 \fi
 
 
 
 
-
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% Name in the upper right corner of every page (except cover sheet)
 
 \pagestyle{fancy}
 \lhead{}
@@ -115,24 +118,32 @@ seat:& \studentseat
 \vspace*{0.6in}
 \thispagestyle{plain}
 
+
+%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%%
+% The cover sheet
+
+% with no name or zone
 \beginnone
 \begin{minipage}{5.3in}
 \fillinname
 \end{minipage}
 \fi
 %
+% with both a name and a zone
 \beginzoneandname
 \begin{minipage}{5.3in}
 \studentname
 \end{minipage}
 \fi
 %
+% with only a zone
 \beginzoneonly
 \begin{minipage}{5.3in}
 \zoneonly
 \end{minipage}
 \fi
 %
+% and the qr code
 \hfill
 \begin{minipage}{2.0in}
 \includegraphics[width=2.0in]{\qrcode}
