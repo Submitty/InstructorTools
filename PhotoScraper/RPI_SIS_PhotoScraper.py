@@ -251,7 +251,7 @@ if __name__ == "__main__":
     #Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     #Be careful about navigating to any other sites...
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA'
-    driver = webdriver.Chrome(chrome_options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
     try:
         # open SIS
         driver.get('https://sis.rpi.edu/')
