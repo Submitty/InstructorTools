@@ -119,6 +119,7 @@ def saveImagesToFolder(term, course, class_list):
         r = requests.get(img_url)
         with open(str(filepath),'wb') as f:
             f.write(r.content)
+            print("Saved photo for student rcs {}".format(rcs_id))
 
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
 def getStudentInfoFromCourse(driver, select_course, index, class_list):
@@ -178,6 +179,8 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         info_name = driver.find_elements_by_class_name('plaintable')[4].find_element_by_tag_name('tbody').find_element_by_tag_name('tr').find_elements_by_tag_name('td')[1].text
         name = info_name[16:]
         student_record['name'] = name
+
+        print("Gathering info for student: "+name)
 
         # email address
         driver.find_element_by_link_text('Student E-mail Address').click()
