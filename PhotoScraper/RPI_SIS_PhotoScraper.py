@@ -1,6 +1,7 @@
 import getpass, requests, os, re
 from pathlib import Path
 from selenium.webdriver.support.ui import Select
+from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
@@ -21,7 +22,10 @@ def login(driver):
     pin_id = getpass.getpass("PIN: ")
 
     # Click into login page
-    driver.find_element_by_link_text('Login').click()
+    try:
+        driver.find_element_by_link_text('Login').click()
+    except NoSuchElementException:
+        pass
 
     # Types in RIN and PIN in login page
     rin = driver.find_element_by_name('sid')
@@ -250,7 +254,8 @@ def getInfoFromCourse(driver):
 if __name__ == "__main__":      
     #Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     #Be careful about navigating to any other sites...
-    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA'
+
+    requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA:'+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS
     driver = webdriver.Chrome(options=chrome_options)
     try:
         # open SIS
