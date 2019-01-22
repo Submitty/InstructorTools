@@ -14,6 +14,7 @@ def parse_args():
     Parse the arguments for this script and return the namespace from argparse.
     """
     parser = argparse.ArgumentParser(description="Initialize student repos with instructor-provided code.")
+    parser.add_argument("server", type=str, help="git server, e.g., 'https://submitty.myuniversity.edu/git/'")
     parser.add_argument("semester", type=str, help="semester, e.g., 's19'")
     parser.add_argument("course", type=str, help="course, e.g., 'csci1200'")
     parser.add_argument("repo", type=str, help="gradeable/repo name, e.g., 'hw1'")
@@ -70,7 +71,7 @@ def process_student(args,student):
     # history was edited)
     shutil.rmtree(student_path,ignore_errors=True)
 
-    url = "https://submitty.cs.rpi.edu/git/"+args.semester+"/"+args.course+"/"+args.repo+"/"+student
+    url = args.server+"/"+args.semester+"/"+args.course+"/"+args.repo+"/"+student
     
     success = subprocess.call (['git','clone',url,student_path])
     if not success == 0:
