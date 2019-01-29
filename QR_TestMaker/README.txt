@@ -18,6 +18,11 @@ To use...
 2. if the students have uploaded crib sheets, name them 
    students_notes/username.pdf and they will be attached to each test
 
+   Note: If you want to attach crib sheets submitted via Submitty, see the 
+   comment at the top of process.py for more instructions on what to copy. 
+   Set the submissiondir, resultdir, and targetdir variables then run:
+   process_result.py
+
 3. prepare your test template as a pdf.  Leave some space in the upper
    half of the page for the preprinted zone/name/qr code.  (may need
    adjustment... )
@@ -28,3 +33,8 @@ To use...
 5. files will be produced in to_print folder organized into subdirectories by zone
 
 6. tweak overlay.tex if desired and re-run
+
+7. If you want to attach crib sheets submitted via Submitty, see the comment at the
+   top of process.py for more instructions on what to copy. Set the submissiondir,
+   resultdir, and targetdir variables then run:
+   process_result.py
