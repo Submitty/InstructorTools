@@ -33,8 +33,3 @@ To use...
 5. files will be produced in to_print folder organized into subdirectories by zone
 
 6. tweak overlay.tex if desired and re-run
-
-7. If you want to attach crib sheets submitted via Submitty, see the comment at the
-   top of process.py for more instructions on what to copy. Set the submissiondir,
-   resultdir, and targetdir variables then run:
-   process_result.py
