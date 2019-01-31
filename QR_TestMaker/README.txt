@@ -18,10 +18,12 @@ To use...
 2. if the students have uploaded crib sheets, name them 
    students_notes/username.pdf and they will be attached to each test
 
-   Note: If you want to attach crib sheets submitted via Submitty, see the 
-   comment at the top of process.py for more instructions on what to copy. 
-   Set the submissiondir, resultdir, and targetdir variables then run:
-   process_result.py
+   Note: If you want to attach notes pages submitted via Submitty, on
+   Submitty, run /usr/local/submitty/extract_notes_page.py which takes
+   the path to your course, the name of the gradeable students submitted
+   their pages to, and a path where their notes pages will be placed. Once
+   the script has finished, transfer the directory to the same directory as
+   your other test files, and adjust the "notes_dir" in make_all.py
 
 3. prepare your test template as a pdf.  Leave some space in the upper
    half of the page for the preprinted zone/name/qr code.  (may need
