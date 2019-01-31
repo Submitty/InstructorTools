@@ -19,7 +19,7 @@ To use...
    students_notes/username.pdf and they will be attached to each test
 
    Note: If you want to attach notes pages submitted via Submitty, on
-   Submitty, run /usr/local/submitty/extract_notes_page.py which takes
+   Submitty, run /usr/local/submitty/bin/extract_notes_page.py which takes
    the path to your course, the name of the gradeable students submitted
    their pages to, and a path where their notes pages will be placed. Once
    the script has finished, transfer the directory to the same directory as
