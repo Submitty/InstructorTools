@@ -1,4 +1,4 @@
-#!/usr/bin/python
+#!/usr/bin/env python3
 
 import subprocess
 import glob
@@ -16,7 +16,8 @@ notes_dir = "student_notes"
 qr_dir = "qr"
 seating_file = "test_seating.txt"
 blank_data = "blank"
-            
+debug_mode = False
+staff_section = "STAFF" #Name of a section to skip, useful for TAs/staff in a class            
 
 
 # takes the test template file, and overlays the custom information on
@@ -29,26 +30,42 @@ def make_custom_pdf(blank_test_file,cribsheet_file,overlay_file,custom_file):
     if cribsheet_file != "":
         cribsheet = PyPDF2.PdfFileReader(cribsheet_file)
     overlay = PyPDF2.PdfFileReader(overlay_file)
-    my_cover = main_handout.getPage(0)
-    my_cover.mergePage(overlay.getPage(0))
-    output.addPage(my_cover)
+    try:
+        my_cover = main_handout.getPage(0)
+        my_cover.mergePage(overlay.getPage(0))
+        output.addPage(my_cover)
+    except IndexError:
+        print("Failed to get cover page for exam")
+        return False
     # for every other page, we just put the name in the upper right corner
     numpages = main_handout.getNumPages()
-    for i in range(1,numpages):
-        page = main_handout.getPage(i)
-        page.mergePage(overlay.getPage(1))
-        output.addPage(page)
+    try:
+        for i in range(1,numpages):
+            page = main_handout.getPage(i)
+            page.mergePage(overlay.getPage(1))
+            output.addPage(page)
+    except IndexError:
+        print("Failed to get page",i,"from exam")
+        return False
     # and attach the cribsheet
     if cribsheet_file != "":
-        crib1 = cribsheet.getPage(2)
-        crib1.mergePage(overlay.getPage(1))
-        crib2 = cribsheet.getPage(3)
-        crib2.mergePage(overlay.getPage(1))
-        output.addPage(crib1)
-        output.addPage(crib2)
+        try:
+            crib1 = cribsheet.getPage(2)
+            crib1.mergePage(overlay.getPage(1))
+            crib2 = cribsheet.getPage(3)
+            crib2.mergePage(overlay.getPage(1))
+            output.addPage(crib1)
+            output.addPage(crib2)
+        except IndexError:
+            print("Failed to get a page of cribsheet file (should be pages 3 and 4 of)",cribsheet_file)
+            return False
     outputStream = open(custom_file,"wb")
-    output.write(outputStream)
-
+    try:
+        output.write(outputStream)
+    except PyPDF2.utils.PdfReadError:
+        print("^^^Failed to write PDF, probably due to student corruption. Try opening",custom_file,"in a PDF reader")
+        return False
+    return True
 
 # BEFORE RE-GENERATING...  CLEAN UP ALL OLD FILES
 def cleanup():
@@ -58,17 +75,23 @@ def cleanup():
     pathlib.Path(qr_dir+"/").mkdir(parents=True,exist_ok=True)
     
 
-# not used anymore...
+# generated file not used anymore 
 def build_default_notes():
-    subprocess.call(['pdflatex','nonotes.tex'])
+    if debug_mode:
+        subprocess.call(['pdflatex','nonotes.tex'])
+    else:
+        subprocess.call(['pdflatex','nonotes.tex'], stdout=open(os.devnull, 'wb'))
     subprocess.call(['cp','nonotes.pdf',notes_dir])
 
 
 # run latex to produce the blank test template...
 def build_exam():
-    subprocess.call(['rm', '-rf', 'test_template.pdf'], stdout=open(os.devnull, 'wb'))
-    subprocess.call(['pdflatex', 'test_template.tex'], stdout=open(os.devnull, 'wb'))
-
+    if debug_mode:
+        subprocess.call(['rm', '-rf', 'test_template.pdf'])
+        subprocess.call(['pdflatex', 'test_template.tex'])
+    else:
+        subprocess.call(['rm', '-rf', 'test_template.pdf'], stdout=open(os.devnull, 'wb'))
+        subprocess.call(['pdflatex', 'test_template.tex'], stdout=open(os.devnull, 'wb'))
 
 def make_all_exams():
     # loop over the seating file, making an exam for each of the rows/students
@@ -92,7 +115,7 @@ def make_all_exams():
             section = things[3].replace('_',' ')
             if section=="N/A":
                 section=""
-            if section == "STAFF":
+            if section == staff_section:
                 continue
             if len(things) == 4:
                 print ("============PROBABLE DROP "+things[2])
@@ -163,12 +186,14 @@ def make_all_exams():
                 else:
                     f.write ("\\def\\beginzoneandname{\\iftrue}")
                     f.write ("\\def\\beginzoneonly{\\iffalse}")
-            subprocess.call(['pdflatex', 'overlay.tex'], stdout=open(os.devnull, 'wb'))
+            if debug_mode:
+                subprocess.call(['pdflatex', 'overlay.tex'])
+            else:
+                subprocess.call(['pdflatex', 'overlay.tex'], stdout=open(os.devnull, 'wb'))
 
-            make_custom_pdf("test_template.pdf",studentnotes,"overlay.pdf",filename)
-
-            subprocess.call(['mkdir', '-p', 'to_print/'+zone])
-            subprocess.call(['mv',filename,'to_print/'+zone+'/'+filename])
+            if make_custom_pdf("test_template.pdf",studentnotes,"overlay.pdf",filename):
+                subprocess.call(['mkdir', '-p', 'to_print/'+zone])
+                subprocess.call(['mv',filename,'to_print/'+zone+'/'+filename])
 
         qr = qrcode.QRCode(
             version = 1,
@@ -186,11 +211,14 @@ def make_all_exams():
             f.write ("\\def\\beginzoneandname{\\iffalse}")
             f.write ("\\def\\beginzoneonly{\\iffalse}")
 
-        subprocess.call(['pdflatex', 'overlay.tex'], stdout=open(os.devnull, 'wb'))
+        if debug_mode:
+            subprocess.call(['pdflatex', 'overlay.tex'])
+        else:
+            subprocess.call(['pdflatex', 'overlay.tex'], stdout=open(os.devnull, 'wb'))
             
-        make_custom_pdf("test_template.pdf","","overlay.pdf",filename)
+        make_custom_pdf("test_template.pdf","","overlay.pdf","blank_test")
         
-        subprocess.call(['mv',filename,'to_print/blank_test.pdf'])
+        subprocess.call(['mv',"blank_test",'to_print/blank_test.pdf'])
         
 def main():
     cleanup()
