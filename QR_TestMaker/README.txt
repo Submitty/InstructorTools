@@ -1,6 +1,13 @@
 To use...
 
-0. First time... just run
+0. First time...
+
+   Install the following packages with pip:
+   pip3 install --user PyPDF2
+   pip3 install --user qrcode
+   pip3 install --user pillow
+
+   then run:
    python3 make_all.py
 
    to see an example of what is produced.  Then you can replace the
