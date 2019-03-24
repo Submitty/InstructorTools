@@ -27,7 +27,7 @@ def make_custom_pdf(blank_test_file,cribsheet_file,overlay_file,custom_file):
     output = PyPDF2.PdfFileWriter()
     main_handout = PyPDF2.PdfFileReader(blank_test_file)
     if cribsheet_file != "":
-        cribsheet = PyPDF2.PdfFileReader(cribsheet_file)
+        cribsheet = PyPDF2.PdfFileReader(cribsheet_file, strict=False)
     overlay = PyPDF2.PdfFileReader(overlay_file)
     my_cover = main_handout.getPage(0)
     my_cover.mergePage(overlay.getPage(0))
