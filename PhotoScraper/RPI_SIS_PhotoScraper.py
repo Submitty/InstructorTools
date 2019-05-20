@@ -1,5 +1,5 @@
 from io import BytesIO
-from PIL import Image
+import imghdr
 import getpass, requests, os, re
 from pathlib import Path
 from selenium.webdriver.support.ui import Select
@@ -123,17 +123,17 @@ def saveImagesToFolder(term, course, class_list):
         r = requests.get(img_url)
 
         #Open the image use PIL.Image to deduce the extension
-        img = Image.open(BytesIO(r.content))
+        img_format = imghdr.what(BytesIO(r.content)).lower()
         img_name = rcs_id
-        if img.format == "JPEG":
+        if img_format == "jpeg":
             img_name = img_name + ".jpg"
         else:
-            img_name = img_name + "." + img.format.lower()
+            img_name = img_name + "." + img_format
         filepath = path / img_name
 
         #Actually write the file. We could skip the context manager and just use Image.save(filepath)
         with open(str(filepath),'wb') as f:
-            img.save(f)
+            f.write(r.content)
             print("Saved photo for student rcs {}".format(rcs_id))
 
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
