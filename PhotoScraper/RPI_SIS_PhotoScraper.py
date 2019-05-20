@@ -1,3 +1,5 @@
+from io import BytesIO
+from PIL import Image
 import getpass, requests, os, re
 from pathlib import Path
 from selenium.webdriver.support.ui import Select
@@ -115,14 +117,23 @@ def saveImagesToFolder(term, course, class_list):
             if k == "img url":
                 img_url = class_list[i].get(k)
         # download and save the image to a specific folder (term/course_section) from the image url
-        img_name = rcs_id+".png"
-        filepath = path / img_name
         if img_url.split("/")[-1].strip() == "web_transparent.gif":
             print("Skipping {} because no photo on SIS".format(rcs_id))
             continue
         r = requests.get(img_url)
+
+        #Open the image use PIL.Image to deduce the extension
+        img = Image.open(BytesIO(r.content))
+        img_name = rcs_id
+        if img.format == "JPEG":
+            img_name = img_name + ".jpg"
+        else:
+            img_name = img_name + "." + img.format.lower()
+        filepath = path / img_name
+
+        #Actually write the file. We could skip the context manager and just use Image.save(filepath)
         with open(str(filepath),'wb') as f:
-            f.write(r.content)
+            img.save(f)
             print("Saved photo for student rcs {}".format(rcs_id))
 
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
