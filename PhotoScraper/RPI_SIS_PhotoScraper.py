@@ -123,7 +123,7 @@ def saveImagesToFolder(term, course, class_list):
         r = requests.get(img_url)
 
         #Deduce the extension, build the output path
-        img_format = imghdr.what(None,BytesIO(r.content).read()).lower()
+        img_format = imghdr.what(None,r.content).lower()
         img_name = rcs_id + "." + img_format
         filepath = path / img_name
 
