@@ -122,13 +122,9 @@ def saveImagesToFolder(term, course, class_list):
             continue
         r = requests.get(img_url)
 
-        #Open the image use PIL.Image to deduce the extension
-        img_format = imghdr.what(BytesIO(r.content)).lower()
-        img_name = rcs_id
-        if img_format == "jpeg":
-            img_name = img_name + ".jpg"
-        else:
-            img_name = img_name + "." + img_format
+        #Deduce the extension, build the output path
+        img_format = imghdr.what(None,BytesIO(r.content).read()).lower()
+        img_name = rcs_id + "." + img_format
         filepath = path / img_name
 
         #Actually write the file. We could skip the context manager and just use Image.save(filepath)
