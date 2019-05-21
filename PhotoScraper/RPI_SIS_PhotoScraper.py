@@ -1,3 +1,4 @@
+import imghdr
 import getpass, requests, os, re
 from pathlib import Path
 from selenium.webdriver.support.ui import Select
@@ -115,12 +116,17 @@ def saveImagesToFolder(term, course, class_list):
             if k == "img url":
                 img_url = class_list[i].get(k)
         # download and save the image to a specific folder (term/course_section) from the image url
-        img_name = rcs_id+".png"
-        filepath = path / img_name
         if img_url.split("/")[-1].strip() == "web_transparent.gif":
             print("Skipping {} because no photo on SIS".format(rcs_id))
             continue
         r = requests.get(img_url)
+
+        #Deduce the extension, build the output path
+        img_format = imghdr.what(None,r.content).lower()
+        img_name = rcs_id + "." + img_format
+        filepath = path / img_name
+
+        #Actually write the file. We could skip the context manager and just use Image.save(filepath)
         with open(str(filepath),'wb') as f:
             f.write(r.content)
             print("Saved photo for student rcs {}".format(rcs_id))
