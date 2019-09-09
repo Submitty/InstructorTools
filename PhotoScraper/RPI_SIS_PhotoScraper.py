@@ -6,7 +6,7 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+# chrome_options.add_argument("--headless")
 from selenium.webdriver.common.keys import Keys
 
 #Workaround for if pyopenssl is installed and we want weak keys
@@ -173,7 +173,11 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         print('Row Number: ' + str(s))
         print('Row Length: ' + str(len(student.find_elements_by_tag_name('td'))))
         print('Cell Value: ' + student.find_elements_by_tag_name('td')[stu_col].text)
-        student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
+        try:
+            student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
+        except:
+            input()
+            raise
 
         img_url = driver.current_url
         driver.get(img_url)
