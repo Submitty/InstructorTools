@@ -156,7 +156,8 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
     for i in range(len(student_headers)):
         if student_headers[i].text == "Student Name":
             stu_col = i
-    if stu_col <0:
+            break
+    if stu_col < 0:
         driver.back()
         driver.back()
         print("Error: Could not find a column labeled \"Student Name\"!")
