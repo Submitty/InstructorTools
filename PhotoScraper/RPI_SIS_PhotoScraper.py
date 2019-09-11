@@ -8,7 +8,7 @@ from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
 
 # NOTE: comment this out to debug visually
-chrome_options.add_argument("--headless")
+#chrome_options.add_argument("--headless")
 
 from selenium.webdriver.common.keys import Keys
 
