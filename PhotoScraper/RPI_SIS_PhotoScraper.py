@@ -6,7 +6,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
-chrome_options.add_argument("--headless")
+
+# NOTE: comment this out to debug visually
+#chrome_options.add_argument("--headless")
+
 from selenium.webdriver.common.keys import Keys
 
 #Workaround for if pyopenssl is installed and we want weak keys
@@ -14,7 +17,7 @@ try:
     from urllib3.contrib import pyopenssl
     pyopenssl.extract_from_urllib3()
 except ImportError:
-    pass    
+    pass
 
 # Login to SIS
 def login(driver):
@@ -90,11 +93,11 @@ def saveImagesToFolder(term, course, class_list):
         print ("Invalid format for course name")
         return
     course_folder_name = "{}-{}-{}".format(*course_name.groups())
-    
+
     # make term (month year) into month-year
     term_elements = term.split()
     folder_term = term_elements[0]+"-"+term_elements[1]
-    
+
     # get path and create path if not already existed
     path = Path(folder_term, course_folder_name)
     path.mkdir(exist_ok=True, parents=True)
@@ -156,18 +159,31 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
     for i in range(len(student_headers)):
         if student_headers[i].text == "Student Name":
             stu_col = i
-    if stu_col <0:
+            break
+    if stu_col < 0:
         driver.back()
         driver.back()
         print("Error: Could not find a column labeled \"Student Name\"!")
         return 0
+
+    # NOTE: uncomment this line to help with debugging
+    #print("Student column: " + str(stu_col))
 
     # loop through list of students to get image, name, and email
     # all info collected from for loop (img url, name, email) put into dict
     for s in range(1, len(student_list)):
         student_record = {}
         student = driver.find_elements_by_class_name('datadisplaytable')[2].find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')[s]
-        student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
+
+        # NOTE: uncomment these line to help with debugging
+        #print('Row Number: ' + str(s))
+        #print('Row Length: ' + str(len(student.find_elements_by_tag_name('td'))))
+        #print('Cell Value: ' + student.find_elements_by_tag_name('td')[stu_col].text)
+        try:
+            student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
+        except:
+            input()
+            raise
 
         img_url = driver.current_url
         driver.get(img_url)
@@ -223,11 +239,11 @@ def getInfoFromCourse(driver):
     if len(driver.find_elements_by_class_name('warningtext')) == 1:
         print ("Error: No sections assigned for this term!")
         return
-    
+
     # iterate and ask if user wants images/names from this course
     select_course = Select(driver.find_element_by_name('crn'))
     options_course = select_course.options
-    
+
     for index in range(len(options_course)):
         # all dicts put into list for each class section
         class_list = []
@@ -257,7 +273,7 @@ def getInfoFromCourse(driver):
             else:
                 print("Invalid answer! Try again!")
 
-if __name__ == "__main__":      
+if __name__ == "__main__":
     #Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     #Be careful about navigating to any other sites...
 
@@ -270,5 +286,5 @@ if __name__ == "__main__":
         if login(driver):
             getInfoFromCourse(driver)
     finally:
-        # ends the program 
-        driver.quit()    
+        # ends the program
+        driver.quit()
