@@ -6,7 +6,10 @@ from selenium.common.exceptions import NoSuchElementException
 from selenium import webdriver
 from selenium.webdriver.chrome.options import Options
 chrome_options = Options()
-# chrome_options.add_argument("--headless")
+
+# NOTE: comment this out to debug visually
+chrome_options.add_argument("--headless")
+
 from selenium.webdriver.common.keys import Keys
 
 #Workaround for if pyopenssl is installed and we want weak keys
@@ -163,16 +166,19 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         print("Error: Could not find a column labeled \"Student Name\"!")
         return 0
 
-    print("Student column: " + stu_col)
+    # NOTE: uncomment this line to help with debugging
+    #print("Student column: " + str(stu_col))
 
     # loop through list of students to get image, name, and email
     # all info collected from for loop (img url, name, email) put into dict
     for s in range(1, len(student_list)):
         student_record = {}
         student = driver.find_elements_by_class_name('datadisplaytable')[2].find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')[s]
-        print('Row Number: ' + str(s))
-        print('Row Length: ' + str(len(student.find_elements_by_tag_name('td'))))
-        print('Cell Value: ' + student.find_elements_by_tag_name('td')[stu_col].text)
+
+        # NOTE: uncomment these line to help with debugging
+        #print('Row Number: ' + str(s))
+        #print('Row Length: ' + str(len(student.find_elements_by_tag_name('td'))))
+        #print('Cell Value: ' + student.find_elements_by_tag_name('td')[stu_col].text)
         try:
             student.find_elements_by_tag_name('td')[stu_col].find_element_by_class_name('fieldmediumtext').click()
         except:
