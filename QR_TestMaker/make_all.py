@@ -196,12 +196,14 @@ def make_all_exams():
                 subprocess.call(['mv',filename,'to_print/'+zone+'/'+filename])
 
         qr = qrcode.QRCode(
-            version = 1,
-            #error_correction = qrcode.constants.ERROR_CORRECT_H, _L, _M, _Q, _H
+            version = None,
+            error_correction = qrcode.constants.ERROR_CORRECT_H,
             box_size = 10,
             border = 4,
         )
         qr.add_data(blank_data)
+        qr.make(fit=True)
+
         img = qr.make_image()
         img.save(qr_dir+'/' + blank_data + '.png') #can also be .bmp, .jpeg
         
