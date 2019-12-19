@@ -209,7 +209,9 @@ def getStudentInfoFromCourse(driver, select_course, index, class_list):
         print("Gathering info for student: "+name)
 
         # email address
-        driver.find_element_by_link_text('Student E-mail Address').click()
+        email_element = driver.find_element_by_link_text('Student E-mail Address')
+        email_element.send_keys(Keys.DOWN)
+        email_element.click()
         if len(driver.find_elements_by_class_name('datadisplaytable')) == 1:
             emails = driver.find_element_by_class_name('datadisplaytable').find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
             for i in range(len(emails)):
