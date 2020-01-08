@@ -53,14 +53,13 @@ def login():
 
     # By default we launch the display and allow visual debugging
     if args.headless:
-        print("Going headless!")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
 
     # Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     # Be careful about navigating to any other sites...
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA:'+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS
-    driver = webdriver.Chrome("/usr/bin/chromedriver",options=chrome_options)
+    driver = webdriver.Chrome(options=chrome_options)
 
     # open SIS
     driver.get('https://sis.rpi.edu/')
@@ -73,16 +72,15 @@ def login():
         driver.find_element_by_link_text('Login').click()
     except NoSuchElementException:
         pass
+    except:
+        driver.quit()
+        raise
 
     # Types in RIN and PIN in login page
     rin = driver.find_element_by_name('sid')
-    print(f"Typing SID: {rin_id}")
     rin.send_keys(rin_id)
     pin = driver.find_element_by_name('PIN')
-    print(f"Typing PIN: {pin_id}")
     pin.send_keys(pin_id)
-    print("Returning now")
-    return driver,False
 
     # click login button
     driver.find_element_by_xpath("//input[@value='Login']").click()
@@ -100,11 +98,9 @@ def login():
 def selectTerm(driver):
     # read term from (optional) file
     term = ""
-    try:
+    if len(str(args.term_file))>0 and os.path.isfile(str(args.term_file)):
         with open(str(args.term_file),'r') as f:
             term = f.readline().strip()
-    except:
-        pass
 
     # click Instructors & Advisors Menu
     driver.find_element_by_link_text('Instructor & Advisor Menu').click()
@@ -179,8 +175,16 @@ def saveImagesToFolder(term, class_list):
         obj['last_name'] = class_list[i]['last_name']
 
         obj['rin'] = class_list[i]['rin']
-        obj['rcs'] = class_list[i]['rcs']
-        obj['email'] = class_list[i]['email']
+        if "rcs" not in class_list[i]:
+            obj['rcs'] = ""
+            print(f"Warning: no RCS for {class_list[i]['name']}")
+        else:
+            obj['rcs'] = class_list[i]['rcs']
+        if "email" not in class_list[i]:
+            obj['email'] = ""
+            print(f"Warning: no email for {class_list[i]['name']}")
+        else:
+            obj['email'] = class_list[i]['email']
 
         obj['course_crn'] = class_list[i]['course_crn']
         obj['course_prefix'] = class_list[i]['course_prefix']
@@ -403,21 +407,16 @@ def getStudentInfoFromCourse(driver, term):
 def loopOverCourses(driver,term):
     # read crns from (optional) file
     crns = []
-    try:
+    if len(str(args.crn_file))>0 and os.path.isfile(str(args.crn_file)):
         with open(str(args.crn_file),'r') as f:
             while True:
                 crn = f.readline().strip()
                 if len(crn) != 5:
                     break
                 crns.append(crn)
-    except:
-        pass
 
     # make a directory to hold the registration directories
-    try:
-        os.makedirs('all_json')
-    except:
-        pass
+    os.makedirs('all_json',exist_ok=True)
 
     # click Course Information- Select a CRN
     driver.find_element_by_link_text('Course Information- Select a CRN').click()
@@ -484,4 +483,7 @@ if __name__ == "__main__":
 
     finally:
         # ends the program
-        driver.quit()
+        try:
+            driver.quit()
+        except:
+            pass #If we got an exception in login(), driver will not exist in this scope
