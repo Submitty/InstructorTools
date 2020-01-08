@@ -12,7 +12,6 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-chrome_options = Options()
 
 
 ##################################################################
@@ -42,24 +41,26 @@ except ImportError:
 ##################################################################
 # Login to SIS
 def login():
+    chrome_options = Options()
     # read credentials from (optional) file
-    try:
+    if len(args.credentials_file)>0 and os.path.isfile(args.credentials_file):
         with open(str(args.credentials_file),'r') as f:
             rin_id = f.readline().strip()
             pin_id = f.readline().strip()
-    except:
+    else:
         rin_id = input("RIN: ")
         pin_id = getpass.getpass("PIN: ")
 
     # By default we launch the display and allow visual debugging
     if args.headless:
+        print("Going headless!")
         chrome_options.add_argument("--headless")
         chrome_options.add_argument("--no-sandbox")
 
     # Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     # Be careful about navigating to any other sites...
     requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS = 'DES-CBC3-SHA:AES128-SHA:'+requests.packages.urllib3.util.ssl_.DEFAULT_CIPHERS
-    driver = webdriver.Chrome(options=chrome_options)
+    driver = webdriver.Chrome("/usr/bin/chromedriver",options=chrome_options)
 
     # open SIS
     driver.get('https://sis.rpi.edu/')
@@ -75,9 +76,13 @@ def login():
 
     # Types in RIN and PIN in login page
     rin = driver.find_element_by_name('sid')
+    print(f"Typing SID: {rin_id}")
     rin.send_keys(rin_id)
     pin = driver.find_element_by_name('PIN')
+    print(f"Typing PIN: {pin_id}")
     pin.send_keys(pin_id)
+    print("Returning now")
+    return driver,False
 
     # click login button
     driver.find_element_by_xpath("//input[@value='Login']").click()
