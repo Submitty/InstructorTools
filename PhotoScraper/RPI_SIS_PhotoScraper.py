@@ -14,10 +14,6 @@ from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
 chrome_options = Options()
 
-# NOTE: comment this out to debug visually
-#chrome_options.add_argument("--headless")
-#chrome_options.add_argument("--no-sandbox")
-
 
 ##################################################################
 # a few optional command line argument variables
@@ -28,6 +24,9 @@ parser.add_argument('--term_file', type=str, default="",
                     help='a file containing the term')
 parser.add_argument('--crn_file', type=str, default="",
                     help='a file containing the crns of desired courses')
+parser.add_argument('--headless', default=False, action="store_true",
+                    help='run program without visual display')
+
 args = parser.parse_args()
 
 
@@ -51,6 +50,11 @@ def login():
     except:
         rin_id = input("RIN: ")
         pin_id = getpass.getpass("PIN: ")
+
+    # By default we launch the display and allow visual debugging
+    if args.headless:
+        chrome_options.add_argument("--headless")
+        chrome_options.add_argument("--no-sandbox")
 
     # Just setting the default ciphers (for this session) to be weak DES/SHA for SIS compatibility
     # Be careful about navigating to any other sites...
