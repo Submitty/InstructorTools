@@ -404,6 +404,12 @@ def loopOverCourses(driver,term):
     except:
         pass
 
+    # make a directory to hold the registration directories
+    try:
+        os.makedirs('all_json')
+    except:
+        pass
+
     # click Course Information- Select a CRN
     driver.find_element_by_link_text('Course Information- Select a CRN').click()
 
