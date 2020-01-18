@@ -244,10 +244,47 @@ def getStudentInfoFromCourse(driver, term):
     # click Summary Class List & Electronic Warning System (EWS)
     driver.find_element_by_link_text('Summary Class List & Electronic Warning System (EWS)').click()
 
+    try:
+        current_record = driver.find_element_by_partial_link_text('Current Record Set')
+        print ("'Current Record Set' label found")
+        try:
+            first = driver.find_element_by_link_text('Current Record Set: 1 - 200')
+            print ("1-200 found")
+            getStudentInfoFromCourseHelper(driver,term, class_list)
+            print ("1-200 finished")
+            try:
+                second = driver.find_element_by_partial_link_text('201 -')
+                print ("201-?? found")
+                second.click()
+                getStudentInfoFromCourseHelper(driver,term, class_list)
+                driver.back()
+                print ("201-?? finished")
+            except:
+                print ("ERROR IN CURRENT RECORD COUNTING -- SECOND")
+                return 0
+        except:
+            print ("ERROR IN CURRENT RECORD COUNTING -- FIRST")
+            return 0
+    except:
+        print ("'Current Record Set' label not found")
+        getStudentInfoFromCourseHelper(driver,term, class_list)
+
+    driver.back()
+    driver.back()
+
+    if class_list == 0:
+        print ("Warning: this class size is 0")
+    else:
+        # Use the info collected and save the image with rcs id for term/course in current directory
+        saveImagesToFolder(term, class_list)
+
+
+##################################################################
+# returns the class list of dictionaries of info collected about each student's img url, name, and email
+def getStudentInfoFromCourseHelper(driver, term, class_list):
+
     # check if class is size 0
     if len(driver.find_elements_by_class_name('errortext')) == 1:
-        driver.back()
-        driver.back()
         print("Error: Class size is 0!")
         return 0
 
@@ -294,14 +331,10 @@ def getStudentInfoFromCourse(driver, term):
             id_col = i
 
     if stu_col < 0:
-        driver.back()
-        driver.back()
         print("Error: Could not find a column labeled \"Student Name\"!")
         return 0
 
     if id_col < 0:
-        driver.back()
-        driver.back()
         print("Error: Could not find a column labeled \"ID\"!")
         return 0
 
@@ -392,14 +425,6 @@ def getStudentInfoFromCourse(driver, term):
         class_list.append(student_record)
         driver.back()
         driver.back()
-    driver.back()
-    driver.back()
-
-    if class_list == 0:
-        print ("Warning: this class size is 0")
-    else:
-        # Use the info collected and save the image with rcs id for term/course in current directory
-        saveImagesToFolder(term, class_list)
 
 
 ##################################################################
