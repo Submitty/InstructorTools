@@ -305,9 +305,9 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
     if len(COURSENAMESTRING_split[-1]) != 12:
         print ("ERROR: course prefix / code bug")
         return 0
-    COURSEPREFIX = COURSENAMESTRING_split[1][0:4]
-    COURSENUMBER = COURSENAMESTRING_split[1][5:9]
-    COURSESECTION = COURSENAMESTRING_split[1][10:]
+    COURSEPREFIX = COURSENAMESTRING_split[-1][0:4]
+    COURSENUMBER = COURSENAMESTRING_split[-1][5:9]
+    COURSESECTION = COURSENAMESTRING_split[-1][10:]
 
     CRNSTRING = driver.find_elements_by_class_name('datadisplaytable')[0].find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
     CRNSTRING = str(CRNSTRING[1].text)
