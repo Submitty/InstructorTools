@@ -445,12 +445,8 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
             for table in driver.find_elements_by_class_name('datadisplaytable'):
                 stuff = table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
                 for i in range(len(stuff)):
-                    if stuff[i].text == "Bachelor of Science":
-                        degree = "Bachelor of Science"
-                    if stuff[i].text == "Master of Science":
-                        degree = "Master of Science"
-                    if stuff[i].text == "Doctor of Philosophy":
-                        degree = "Doctor of Philosophy"
+                    if stuff[i].text == "Current Program":
+                        degree = stuff[i+1].text
 
                     if stuff[i].text[0:7] == "Major: ":
                         majors = addMajor(majors,degree,stuff[i].text[7:])
