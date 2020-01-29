@@ -173,6 +173,7 @@ def saveImagesToFolder(term, class_list):
         obj['first_name'] = class_list[i]['first_name']
         obj['middle_name'] = class_list[i]['middle_name']
         obj['last_name'] = class_list[i]['last_name']
+        obj['degrees'] = class_list[i]['degrees']
 
         obj['rin'] = class_list[i]['rin']
         if "rcs" not in class_list[i]:
@@ -448,6 +449,8 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
                         degree = "Bachelor of Science"
                     if stuff[i].text == "Master of Science":
                         degree = "Master of Science"
+                    if stuff[i].text == "Doctor of Philosophy":
+                        degree = "Doctor of Philosophy"
 
                     if stuff[i].text[0:7] == "Major: ":
                         majors = addMajor(majors,degree,stuff[i].text[7:])
@@ -460,6 +463,7 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
 
         student_record['degrees'] = []
         for m in majors:
+            #print ("MAJOR"+m)
             student_record['degrees'].append(m)
 
         class_list.append(student_record)
