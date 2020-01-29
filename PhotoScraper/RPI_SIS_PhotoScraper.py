@@ -278,6 +278,16 @@ def getStudentInfoFromCourse(driver, term):
         # Use the info collected and save the image with rcs id for term/course in current directory
         saveImagesToFolder(term, class_list)
 
+##################################################################
+def addMajor(majors,degree,text):
+    majors.append(degree + " / " + text)
+    return majors
+
+
+def addConcentrationToLastMajor(majors,text):
+    majors[-1] = majors[-1] + " / " + text
+    return majors
+
 
 ##################################################################
 # returns the class list of dictionaries of info collected about each student's img url, name, and email
@@ -422,8 +432,37 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
                     student_record['email'] = email
                     student_record['rcs'] = email[0:len(email)-8]
                     break
-        class_list.append(student_record)
         driver.back()
+
+        degree = "UNKNOWN"
+        majors = []
+
+        # undergraduate major
+        driver.find_element_by_link_text('Student Information').click()
+        if len(driver.find_elements_by_class_name('datadisplaytable')) >= 1:
+
+            for table in driver.find_elements_by_class_name('datadisplaytable'):
+                stuff = table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+                for i in range(len(stuff)):
+                    if stuff[i].text == "Bachelor of Science":
+                        degree = "Bachelor of Science"
+                    if stuff[i].text == "Master of Science":
+                        degree = "Master of Science"
+
+                    if stuff[i].text[0:7] == "Major: ":
+                        majors = addMajor(majors,degree,stuff[i].text[7:])
+                    if stuff[i].text[0:22] == "Major and Department: ":
+                        majors = addMajor(majors,degree,stuff[i].text[22:])
+                    if stuff[i].text[0:21] == "Major Concentration: ":
+                        majors = addConcentrationToLastMajor(majors,stuff[i].text[21:])
+
+        driver.back()
+
+        student_record['degrees'] = []
+        for m in majors:
+            student_record['degrees'].append(m)
+
+        class_list.append(student_record)
         driver.back()
 
 
