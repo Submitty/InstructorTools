@@ -77,13 +77,13 @@ def login():
         raise
 
     # Types in RIN and PIN in login page
-    rin = driver.find_element_by_name('sid')
+    rin = driver.find_element_by_name('username')
     rin.send_keys(rin_id)
-    pin = driver.find_element_by_name('PIN')
+    pin = driver.find_element_by_name('password')
     pin.send_keys(pin_id)
 
     # click login button
-    driver.find_element_by_xpath("//input[@value='Login']").click()
+    driver.find_element_by_xpath("//input[@value='LOGIN']").click()
     # checks to see if login credentials work- if not, return False and end program
     success = True
     if "Authorization Failure - Invalid User ID or PIN." in driver.page_source:
