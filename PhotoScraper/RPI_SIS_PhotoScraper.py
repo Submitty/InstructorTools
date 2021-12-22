@@ -64,31 +64,55 @@ def login():
     # open SIS
     driver.get('https://sis.rpi.edu/')
 
-    # slight delay to allow page to load
-    time.sleep(1)
-
-    # Click into login page
+    count = 0
+    while True:
+        count += 1
+        # Types in username & password in login page
+        try:
+            username_box = driver.find_element_by_id('username')
+            break
+        except:
+            if count > 10:
+                print ("ERROR: couldn't find username box")
+                exit(0)
+        # slight delay to allow page to load
+        print ("wait a little longer for the page to load")
+        time.sleep(1)
+    username_box.send_keys(rin_id)
     try:
-        driver.find_element_by_link_text('Login').click()
-    except NoSuchElementException:
-        pass
+        password_box = driver.find_element_by_id('password')
     except:
-        driver.quit()
-        raise
+        print ("ERROR: couldn't find password box")
+        exit(0)
 
-    # Types in RIN and PIN in login page
-    rin = driver.find_element_by_name('username')
-    rin.send_keys(rin_id)
-    pin = driver.find_element_by_name('password')
-    pin.send_keys(pin_id)
+    password_box.send_keys(pin_id)
 
-    # click login button
-    driver.find_element_by_xpath("//input[@value='LOGIN']").click()
-    # checks to see if login credentials work- if not, return False and end program
+    time.sleep(2)
+
+    try:
+        # click login button
+        login_button = driver.find_element_by_name("submit")
+    except:
+        print ("ERROR: couldn't find submit button")
+        exit(0)
+
+    print ("now we can click login button")
+    login_button.click()
+
+    time.sleep(2)
+
+    while True:
+
+        time.sleep(3)
+
+        if "Rensselaer Self-Service Information System" in driver.page_source:
+            print("success -- made it past duo page")
+            break
+        else:
+            print("please complete duo authentication")
+
+    print ("Continuing with processing...")
     success = True
-    if "Authorization Failure - Invalid User ID or PIN." in driver.page_source:
-        print("Authorization Failure - Invalid User ID or PIN.")
-        success = False
 
     return driver, success
 
