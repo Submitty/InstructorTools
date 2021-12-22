@@ -64,31 +64,55 @@ def login():
     # open SIS
     driver.get('https://sis.rpi.edu/')
 
-    # slight delay to allow page to load
-    time.sleep(1)
-
-    # Click into login page
+    count = 0
+    while True:
+        count += 1
+        # Types in username & password in login page
+        try:
+            username_box = driver.find_element_by_id('username')
+            break
+        except:
+            if count > 10:
+                print ("ERROR: couldn't find username box")
+                exit(0)
+        # slight delay to allow page to load
+        print ("wait a little longer for the page to load")
+        time.sleep(1)
+    username_box.send_keys(rin_id)
     try:
-        driver.find_element_by_link_text('Login').click()
-    except NoSuchElementException:
-        pass
+        password_box = driver.find_element_by_id('password')
     except:
-        driver.quit()
-        raise
+        print ("ERROR: couldn't find password box")
+        exit(0)
 
-    # Types in RIN and PIN in login page
-    rin = driver.find_element_by_name('username')
-    rin.send_keys(rin_id)
-    pin = driver.find_element_by_name('password')
-    pin.send_keys(pin_id)
+    password_box.send_keys(pin_id)
 
-    # click login button
-    driver.find_element_by_xpath("//input[@value='LOGIN']").click()
-    # checks to see if login credentials work- if not, return False and end program
+    time.sleep(2)
+
+    try:
+        # click login button
+        login_button = driver.find_element_by_name("submit")
+    except:
+        print ("ERROR: couldn't find submit button")
+        exit(0)
+
+    print ("now we can click login button")
+    login_button.click()
+
+    time.sleep(2)
+
+    while True:
+
+        time.sleep(3)
+
+        if "Rensselaer Self-Service Information System" in driver.page_source:
+            print("success -- made it past duo page")
+            break
+        else:
+            print("please complete duo authentication")
+
+    print ("Continuing with processing...")
     success = True
-    if "Authorization Failure - Invalid User ID or PIN." in driver.page_source:
-        print("Authorization Failure - Invalid User ID or PIN.")
-        success = False
 
     return driver, success
 
@@ -173,6 +197,7 @@ def saveImagesToFolder(term, class_list):
         obj['first_name'] = class_list[i]['first_name']
         obj['middle_name'] = class_list[i]['middle_name']
         obj['last_name'] = class_list[i]['last_name']
+        obj['degrees'] = class_list[i]['degrees']
 
         obj['rin'] = class_list[i]['rin']
         if "rcs" not in class_list[i]:
@@ -277,6 +302,16 @@ def getStudentInfoFromCourse(driver, term):
     else:
         # Use the info collected and save the image with rcs id for term/course in current directory
         saveImagesToFolder(term, class_list)
+
+##################################################################
+def addMajor(majors,degree,text):
+    majors.append(degree + " / " + text)
+    return majors
+
+
+def addConcentrationToLastMajor(majors,text):
+    majors[-1] = majors[-1] + " / " + text
+    return majors
 
 
 ##################################################################
@@ -422,8 +457,36 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
                     student_record['email'] = email
                     student_record['rcs'] = email[0:len(email)-8]
                     break
-        class_list.append(student_record)
         driver.back()
+
+        degree = "UNKNOWN"
+        majors = []
+
+        # undergraduate major
+        driver.find_element_by_link_text('Student Information').click()
+        if len(driver.find_elements_by_class_name('datadisplaytable')) >= 1:
+
+            for table in driver.find_elements_by_class_name('datadisplaytable'):
+                stuff = table.find_element_by_tag_name('tbody').find_elements_by_tag_name('tr')
+                for i in range(len(stuff)):
+                    if stuff[i].text == "Current Program":
+                        degree = stuff[i+1].text
+
+                    if stuff[i].text[0:7] == "Major: ":
+                        majors = addMajor(majors,degree,stuff[i].text[7:])
+                    if stuff[i].text[0:22] == "Major and Department: ":
+                        majors = addMajor(majors,degree,stuff[i].text[22:])
+                    if stuff[i].text[0:21] == "Major Concentration: ":
+                        majors = addConcentrationToLastMajor(majors,stuff[i].text[21:])
+
+        driver.back()
+
+        student_record['degrees'] = []
+        for m in majors:
+            #print ("MAJOR"+m)
+            student_record['degrees'].append(m)
+
+        class_list.append(student_record)
         driver.back()
 
 
