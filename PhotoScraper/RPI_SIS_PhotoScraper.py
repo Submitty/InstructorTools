@@ -12,7 +12,7 @@ from selenium.webdriver.common.by import By
 from selenium.webdriver.support.ui import WebDriverWait
 from selenium.webdriver.support import expected_conditions as EC
 from selenium.webdriver.common.keys import Keys
-
+from datetime import datetime
 
 ##################################################################
 # a few optional command line argument variables
@@ -25,6 +25,10 @@ parser.add_argument('--crn_file', type=str, default="",
                     help='a file containing the crns of desired courses')
 parser.add_argument('--headless', default=False, action="store_true",
                     help='run program without visual display')
+parser.add_argument('--no_photos', default=False, action="store_true",
+                    help='dont save photos')
+parser.add_argument('--run_forever', default=False, action="store_true",
+                    help='keep clicking to avoid auto-timeout')
 
 args = parser.parse_args()
 
@@ -238,6 +242,8 @@ def saveImagesToFolder(term, class_list):
             if k == "img url":
                 img_url = class_list[i].get(k)
         # download and save the image to a specific folder (term/course_section) from the image url
+        if args.no_photos:
+            continue
         if img_url.split("/")[-1].strip() == "web_transparent.gif":
             print("Skipping {} because no photo on SIS".format(rcs_id))
             continue
@@ -271,7 +277,7 @@ def getStudentInfoFromCourse(driver, term):
 
     try:
         current_record = driver.find_element_by_partial_link_text('Current Record Set')
-        print ("'Current Record Set' label found")
+        #print ("'Current Record Set' label found")
         try:
             first = driver.find_element_by_link_text('Current Record Set: 1 - 200')
             print ("1-200 found")
@@ -291,7 +297,7 @@ def getStudentInfoFromCourse(driver, term):
             print ("ERROR IN CURRENT RECORD COUNTING -- FIRST")
             return 0
     except:
-        print ("'Current Record Set' label not found")
+        #print ("'Current Record Set' label not found")
         getStudentInfoFromCourseHelper(driver,term, class_list)
 
     driver.back()
@@ -492,6 +498,24 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
 
 ##################################################################
 # Gets the info regarding each course of student images with their rcs id
+def wasteTimeClicking(driver,seconds):
+    counter = 0
+    while counter < seconds:
+        print("wasting time")
+
+        # click Instructors & Advisors Menu
+        driver.find_element_by_link_text('Instructor & Advisor Menu').click()
+        time.sleep(5)
+
+        # click Select a Semester or Summer Session
+        driver.find_element_by_link_text('Select a Semester or Summer Session').click()
+        time.sleep(55)
+
+        counter += 60
+
+
+##################################################################
+# Gets the info regarding each course of student images with their rcs id
 def loopOverCourses(driver,term):
     # read crns from (optional) file
     crns = []
@@ -562,12 +586,30 @@ def loopOverCourses(driver,term):
 if __name__ == "__main__":
     try:
         driver, success = login()
+
         # if login is valid with correct User ID or PIN, continue the program by collecting data
         if success:
-            # Get the term to use to save images
-            term, success = selectTerm(driver)
-        if success:
-            loopOverCourses(driver,term)
+
+            while True:
+
+                # Get the term to use to save images
+                term, success = selectTerm(driver)
+
+                if success:
+                    loopOverCourses(driver,term)
+
+                    sttime = datetime.now().strftime('%Y%m%d %H:%M:%S')
+                    with open("last_completed_run.txt", 'a') as logfile:
+                        logfile.write(sttime + ' completed scrape\n')
+
+                if not args.run_forever:
+                    print ("--------------------\nlets NOT run forever\n--------------------")
+                    break
+
+                # wait a number of hours before doing it all again
+                num_hours = 1
+                wasteTimeClicking(driver,60*60*num_hours)
+                print ("----------------\nLETS RUN FOREVER\n----------------")
 
     finally:
         # ends the program
