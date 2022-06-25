@@ -25,37 +25,37 @@ staff_section = "STAFF" #Name of a section to skip, useful for TAs/staff in a cl
 def make_custom_pdf(blank_test_file,cribsheet_file,overlay_file,custom_file):
     print (custom_file)
     # overlay custom infomation on the cover page
-    output = PyPDF2.PdfFileWriter()
-    main_handout = PyPDF2.PdfFileReader(blank_test_file)
+    output = PyPDF2.PdfWriter()
+    main_handout = PyPDF2.PdfReader(blank_test_file)
     if cribsheet_file != "":
-        cribsheet = PyPDF2.PdfFileReader(cribsheet_file, strict=False)
-    overlay = PyPDF2.PdfFileReader(overlay_file)
+        cribsheet = PyPDF2.PdfReader(cribsheet_file, strict=False)
+    overlay = PyPDF2.PdfReader(overlay_file, strict=False)
     try:
-        my_cover = main_handout.getPage(0)
-        my_cover.mergePage(overlay.getPage(0))
-        output.addPage(my_cover)
+        my_cover = main_handout.pages[0]
+        my_cover.merge_page(overlay.pages[0])
+        output.add_page(my_cover)
     except IndexError:
         print("Failed to get cover page for exam")
         return False
     # for every other page, we just put the name in the upper right corner
-    numpages = main_handout.getNumPages()
+    numpages = len(main_handout.pages)
     try:
         for i in range(1,numpages):
-            page = main_handout.getPage(i)
-            page.mergePage(overlay.getPage(1))
-            output.addPage(page)
+            page = main_handout.pages[i]
+            page.merge_page(overlay.pages[1])
+            output.add_page(page)
     except IndexError:
         print("Failed to get page",i,"from exam")
         return False
     # and attach the cribsheet
     if cribsheet_file != "":
         try:
-            crib1 = cribsheet.getPage(2)
-            crib1.mergePage(overlay.getPage(1))
-            crib2 = cribsheet.getPage(3)
-            crib2.mergePage(overlay.getPage(1))
-            output.addPage(crib1)
-            output.addPage(crib2)
+            crib1 = cribsheet.pages[2]
+            crib1.merge_page(overlay.pages[1])
+            crib2 = cribsheet.pages[3]
+            crib2.merge_page(overlay.pages[1])
+            output.add_page(crib1)
+            output.add_page(crib2)
         except IndexError:
             print("Failed to get a page of cribsheet file (should be pages 3 and 4 of)",cribsheet_file)
             return False
