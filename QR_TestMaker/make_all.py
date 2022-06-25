@@ -25,11 +25,11 @@ staff_section = "STAFF" #Name of a section to skip, useful for TAs/staff in a cl
 def make_custom_pdf(blank_test_file,cribsheet_file,overlay_file,custom_file):
     print (custom_file)
     # overlay custom infomation on the cover page
-    output = PyPDF2.PdfFileWriter()
-    main_handout = PyPDF2.PdfFileReader(blank_test_file)
+    output = PyPDF2.PdfWriter()
+    main_handout = PyPDF2.PdfReader(blank_test_file)
     if cribsheet_file != "":
-        cribsheet = PyPDF2.PdfFileReader(cribsheet_file, strict=False)
-    overlay = PyPDF2.PdfFileReader(overlay_file, strict=False)
+        cribsheet = PyPDF2.PdfReader(cribsheet_file, strict=False)
+    overlay = PyPDF2.PdfReader(overlay_file, strict=False)
     try:
         my_cover = main_handout.pages[0]
         my_cover.merge_page(overlay.pages[0])
