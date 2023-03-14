@@ -80,10 +80,17 @@ def process_student(args,student):
         
     os.chdir (student_path)
 
-    # do the master & provided repos exist?
-    master_exists = subprocess.call(['git','show-ref','master'])
+    # do the main & provided repos exist?
+    main_exists = subprocess.call(['git','show-ref','main'])
     provided_exists = subprocess.call(['git','show-ref','provided'])
-    
+
+    if main_exists == 0:
+        main_commit_count = subprocess.check_output(['git','rev-list', '--count', 'main'])
+        main_empty_commit_count = subprocess.check_output(['git','rev-list', '--count', '--grep=initial empty commit', 'main'])
+        main_commit_count = main_commit_count.decode().strip()
+        main_empty_commit_count = main_empty_commit_count.decode().strip()
+        print (f"MAIN COMMITS {main_commit_count} {main_empty_commit_count}")
+        
     # go to the provided branch (create if doesn't exist)
     if provided_exists == 0:
         print(student," provided branch exists!")
@@ -103,16 +110,24 @@ def process_student(args,student):
     subprocess.call (['git','commit','-m',args.message])
     subprocess.call (['git','push','origin','provided'])
 
-    # if the master branch doesn't yet exist, put the provided code in
+    # if the main branch doesn't yet exist, put the provided code in
     # that branch too
-    if master_exists == 0:
-        print(student," master branch exists!")
+    if main_exists == 0:
+        
+        if main_commit_count == '1':
+            print(student," main branch exists and has only 1 commit!")
+            subprocess.call (['git','checkout','main'])
+            subprocess.call (['git','merge','provided'])
+            subprocess.call (['git','push','origin','main'])
+        else:
+            print(student," main branch exists, multiple commits!")
+            subprocess.call (['git','checkout','main'])
     else:
-        print(student," master branch DOES NOT EXIST")
-        subprocess.call (['git','checkout','-b','master'])
+        print(student," main branch DOES NOT EXIST")
+        subprocess.call (['git','checkout','-b','main'])
         subprocess.call (['git','branch','--unset-upstream'])
         subprocess.call (['git','merge','provided'])
-        subprocess.call (['git','push','origin','master'])
+        subprocess.call (['git','push','origin','main'])
 
     print ("finished student "+student)
     
