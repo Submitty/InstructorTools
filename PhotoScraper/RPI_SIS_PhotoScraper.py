@@ -48,6 +48,12 @@ parser.add_argument(
     action="store_true",
     help="keep clicking to avoid auto-timeout",
 )
+parser.add_argument(
+    "--crns_only",
+    default=False,
+    action="store_true",
+    help="Fetch CRNs for CSCI courses in upcoming term (used for testing)",
+)
 
 args = parser.parse_args()
 
@@ -621,6 +627,7 @@ def loopOverCourses(driver, term):
 
 # Assumes SIS main page is open
 def get_csci_crns(driver):
+    print("Fetching CSCI CRNs")
     driver.find_element(By.LINK_TEXT, "SITE MAP").click()
     driver.find_element(By.LINK_TEXT, "Class Search").click()
 
@@ -648,26 +655,29 @@ if __name__ == "__main__":
     if not success:
         driver.quit()
     else:
-        crns = get_csci_crns(driver)
-        print(crns)
-        # while True:
-        #     # Get the term to use to save images
-        #     term, success = selectTerm(driver)
+        if args.crns_only:
+            crns = get_csci_crns(driver)
+            print(crns)
+            sys.exit(0)
 
-        #     if success:
-        #         loopOverCourses(driver, term)
+        while True:
+            # Get the term to use to save images
+            term, success = selectTerm(driver)
 
-        #         sttime = datetime.now().strftime("%Y%m%d %H:%M:%S")
-        #         with open("last_completed_run.txt", "a") as logfile:
-        #             logfile.write(sttime + " completed scrape\n")
+            if success:
+                loopOverCourses(driver, term)
 
-        #     if not args.run_forever:
-        #         print(
-        #             "--------------------\nlets NOT run forever\n--------------------"
-        #         )
-        #         break
+                sttime = datetime.now().strftime("%Y%m%d %H:%M:%S")
+                with open("last_completed_run.txt", "a") as logfile:
+                    logfile.write(sttime + " completed scrape\n")
 
-        #     # wait a number of hours before doing it all again
-        #     num_hours = 1
-        #     wasteTimeClicking(driver, 60 * 60 * num_hours)
-        #     print("----------------\nLETS RUN FOREVER\n----------------")
+            if not args.run_forever:
+                print(
+                    "--------------------\nlets NOT run forever\n--------------------"
+                )
+                break
+
+            # wait a number of hours before doing it all again
+            num_hours = 1
+            wasteTimeClicking(driver, 60 * 60 * num_hours)
+            print("----------------\nLETS RUN FOREVER\n----------------")
