@@ -85,7 +85,7 @@ def login():
             passwd = f.readline().strip()
     else:
         rcsid = input("RCS ID: ")
-        passwd = getpass.getpass("Password: ")
+        passwd = getpass.getpass("RCS Password: ")
 
     print("Setting up selenium", file=sys.stderr)
     driver = webdriver.Chrome(options=chrome_options)
@@ -107,11 +107,14 @@ def login():
 
         print("2FA: enter code on your phone", file=sys.stderr)
         driver.implicitly_wait(25)
-        driver.find_element(By.ID, "dont-trust-browser-button").click()
+        driver.find_element(
+            By.CSS_SELECTOR,
+            "#dont-trust-browser-button,a[href='/rss/twbkwbis.P_GenMenu?name=bmenu.P_MainMnu']",
+        ).click()
         driver.implicitly_wait(10)
         driver.find_element(
             By.CSS_SELECTOR, 'a[href="/rss/twbkwbis.P_GenMenu?name=bmenu.P_MainMnu"]'
-        )
+        ).click()
 
         return driver, True
     except NoSuchElementException:
