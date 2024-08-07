@@ -609,8 +609,8 @@ def loopOverCourses(driver, term):
                     break
                 else:
                     print("Invalid answer! Try again!")
-    class_list = [student for course in courses for student in course]
-    saveImagesToFolder(class_list)
+    class_list = set([student for course in courses for student in course])
+    saveImagesToFolder(list(class_list))
 
 
 # Assumes SIS main page is open
