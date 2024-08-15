@@ -173,24 +173,12 @@ def selectTerm(driver):
 
 ##################################################################
 # Saves the images with rcs id as image name to a term/course folder
-def saveImagesToFolder(term, class_list):
+def saveImagesToFolder(class_list):
     if len(class_list) == 0:
         return
 
-    course_crn = class_list[0]["course_crn"]
-    course_prefix = class_list[0]["course_prefix"]
-    course_name = class_list[0]["course_name"]
-    course_section = class_list[0]["course_section"]
-    course_number = class_list[0]["course_number"]
-
-    course_folder_name = "{}-{}-{}".format(course_prefix, course_number, course_section)
-
-    # make term (month year) into month-year
-    term_elements = term.split()
-    folder_term = term_elements[0] + "-" + term_elements[1]
-
     # get path and create path if not already existed
-    path = Path(folder_term, course_folder_name)
+    path = Path("images")
     path.mkdir(exist_ok=True, parents=True)
 
     jsonfile = []
@@ -310,9 +298,7 @@ def getStudentInfoFromCourse(driver, term):
 
     if class_list == 0:
         print("Warning: this class size is 0")
-    else:
-        # Use the info collected and save the image with rcs id for term/course in current directory
-        saveImagesToFolder(term, class_list)
+    return class_list
 
 
 ##################################################################
@@ -572,6 +558,8 @@ def loopOverCourses(driver, term):
     # click Course Information- Select a CRN
     driver.find_element(By.LINK_TEXT, "Course Information- Select a CRN").click()
 
+    courses = []
+
     # if there was at least one crn in the file
     if crns:
         driver.find_element(
@@ -584,7 +572,7 @@ def loopOverCourses(driver, term):
             crn_box.send_keys(crn)
             crn_box.send_keys(Keys.TAB)
             crn_box.send_keys(Keys.RETURN)
-            getStudentInfoFromCourse(driver, term)
+            courses.append(getStudentInfoFromCourse(driver, term))
             print("Finished processing CRN " + crn)
         return
 
@@ -614,15 +602,15 @@ def loopOverCourses(driver, term):
                 elif answer == "exit":
                     return
                 elif answer == "y":
-                    print(
-                        "Getting student pictures...  (this could take a few seconds per student)"
-                    )
+                    print("Getting list of students. Will scrape them upon exiting.")
                     select_course.select_by_index(index)
                     driver.find_element(By.XPATH, "//input[@value='Submit']").click()
-                    getStudentInfoFromCourse(driver, term)
+                    courses.append(getStudentInfoFromCourse(driver, term))
                     break
                 else:
                     print("Invalid answer! Try again!")
+    class_list = set([student for course in courses for student in course])
+    saveImagesToFolder(list(class_list))
 
 
 # Assumes SIS main page is open
