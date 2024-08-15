@@ -446,9 +446,6 @@ def getStudentInfoFromCourseHelper(driver, term, class_list):
             input()
             raise
 
-        img_url = driver.current_url
-        driver.get(img_url)
-
         # image, initalize to empty string
         student_record["img url"] = ""
         image_arr = driver.find_elements(By.TAG_NAME, "img")
